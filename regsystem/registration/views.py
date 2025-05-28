@@ -1,12 +1,11 @@
-from django.shortcuts import render
 from .serializers import Registerserializer
 from. models import Register
-from rest_framework import generics
 from django.http import HttpResponse
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from django.db.models import Q
 
 @api_view(['GET'])
 def Home(request):
@@ -37,7 +36,30 @@ def Deleteuser(request):
         'message':'user not found'
      }
      return Response(data, status=200)
+@api_view(['GET'])
+def Userdetails(request):
+    try:
+        user = Register.objects.get(id=2)
+        serializer = Registerserializer(user)
+        return Response(serializer.data)
+    except Exception as e:
+        data = {
+            'message':'User not found'
+        }
+        return Response(data, status = 200)
+@api_view(['GET'])
+def Searchuser(request):
+    
+        query = request.query_params.get('q', None)
+        if query:
+                user = Register.objects.filter(Q(first_name__icontains=query) | Q(last_name__icontains=query))
+                serializer = Registerserializer(user,many=True)
+                return Response(serializer.data)
+        
 
+    #except Exception as e:
+        return Response({'message':'Please enter a search parameter'}, status = 200)     
+         
 
 
     
